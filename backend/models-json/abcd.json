@@ -1,0 +1,32 @@
+{
+  "name": "abcd",
+  "tableName": "personal",
+  "ownerField": "userID",
+  "fields": [
+    {
+      "name": "name",
+      "type": "string",
+      "required": true,
+      "unique": false
+    },
+    {
+      "name": "phone number",
+      "type": "number",
+      "required": true,
+      "unique": true
+    }
+  ],
+  "rbac": {
+    "Admin": [
+      "all"
+    ],
+    "Manager": [
+      "create",
+      "read",
+      "update"
+    ],
+    "Viewer": [
+      "read"
+    ]
+  }
+}

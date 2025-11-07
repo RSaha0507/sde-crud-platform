@@ -1,0 +1,590 @@
+<!--
+ ===================================================================
+ SDE Assignment: Auto-Generated CRUD + RBAC Platform - FRONTEND
+ ===================================================================
+ This single HTML file contains the complete React Admin UI.
+ It uses CDNs to load React, Babel, and Tailwind CSS.
+
+ To Run:
+ 1. Create a 'frontend' folder: `mkdir frontend`
+ 2. Go into it: `cd frontend`
+ 3. Save this file as `index.html`.
+ 4. Open `index.html` directly in your web browser.
+    (You can just double-click the file).
+
+ It will connect to the backend server (assumed to be on http://localhost:4000)
+ ===================================================================
+-->
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-gray-100">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SDE Platform Admin</title>
+    <!-- 1. Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 2. Load React & ReactDOM -->
+    <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+    <!-- 3. Load Babel to transpile JSX in the browser -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+<body class="h-full">
+    <div id="root" class="h-full"></div>
+
+    <!-- 4. Write React App with type="text/babel" -->
+    <script type="text/babel">
+        const { useState, useEffect, useCallback } = React;
+
+        // --- Configuration ---
+        const API_URL = 'http://localhost:4000';
+
+        // --- API Helper ---
+        const api = {
+            async getModels() {
+                const res = await fetch(`${API_URL}/admin/api/models`);
+                if (!res.ok) throw new Error('Failed to fetch models');
+                return res.json();
+            },
+            async publishModel(modelDefinition) {
+                const res = await fetch(`${API_URL}/admin/api/models/publish`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(modelDefinition)
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.message || 'Failed to publish model');
+                return data;
+            },
+            async getData(modelName) {
+                const res = await fetch(`${API_URL}/admin/api/data/${modelName}`);
+                if (!res.ok) throw new Error('Failed to fetch data');
+                return res.json();
+            },
+            async createData(modelName, record) {
+                const res = await fetch(`${API_URL}/admin/api/data/${modelName}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(record)
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.message || 'Failed to create record');
+                return data;
+            },
+            async updateData(modelName, id, record) {
+                const res = await fetch(`${API_URL}/admin/api/data/${modelName}/${id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(record)
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.message || 'Failed to update record');
+                return data;
+            },
+            async deleteData(modelName, id) {
+                const res = await fetch(`${API_URL}/admin/api/data/${modelName}/${id}`, {
+                    method: 'DELETE'
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.message || 'Failed to delete record');
+                return data;
+            }
+        };
+
+        // --- Reusable Components ---
+
+        function Input({ label, ...props }) {
+            return (
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">{label}</label>
+                    <input
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                        {...props}
+                    />
+                </div>
+            );
+        }
+
+        function Checkbox({ label, checked, ...props }) {
+            return (
+                <label class="flex items-center space-x-2">
+                    <input
+                        type="checkbox"
+                        class="h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
+                        checked={checked}
+                        {...props}
+                    />
+                    <span class="text-sm text-gray-700">{label}</span>
+                </label>
+            );
+        }
+
+        function Select({ label, children, ...props }) {
+             return (
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">{label}</label>
+                    <select
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                        {...props}
+                    >
+                        {children}
+                    </select>
+                </div>
+            );
+        }
+
+        function Button({ children, onClick, variant = 'primary', type = 'button' }) {
+            const colors = {
+                primary: 'bg-indigo-600 hover:bg-indigo-700 text-white',
+                secondary: 'bg-gray-200 hover:bg-gray-300 text-gray-800',
+                danger: 'bg-red-600 hover:bg-red-700 text-white'
+            };
+            return (
+                <button
+                    type={type}
+                    onClick={onClick}
+                    class={`px-4 py-2 font-medium rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 ${colors[variant]}`}
+                >
+                    {children}
+                </button>
+            );
+        }
+
+        function Card({ title, children, actions }) {
+            return (
+                <div class="bg-white shadow-lg rounded-lg overflow-hidden">
+                    <div class="px-6 py-4">
+                        <h2 class="text-2xl font-bold text-gray-900">{title}</h2>
+                    </div>
+                    <div class="px-6 py-4 border-t border-gray-200">
+                        {children}
+                    </div>
+                    {actions && (
+                        <div class="px-6 py-3 bg-gray-50 text-right">
+                            {actions}
+                        </div>
+                    )}
+                </div>
+            )
+        }
+        
+        // --- Main App Components ---
+
+        /**
+         * Model Editor Form
+         * Allows creating and publishing a new model.
+         */
+        function ModelEditor({ onPublish }) {
+            const [modelName, setModelName] = useState('');
+            const [tableName, setTableName] = useState('');
+            const [ownerField, setOwnerField] = useState('');
+            const [fields, setFields] = useState([
+                { name: 'name', type: 'string', required: true, unique: false }
+            ]);
+            const [rbac, setRbac] = useState({
+                Admin: ['all'],
+                Manager: ['create', 'read', 'update'],
+                Viewer: ['read']
+            });
+            const [status, setStatus] = useState({ loading: false, error: null, success: null });
+
+            const handleAddField = () => {
+                setFields([...fields, { name: '', type: 'string', required: false, unique: false }]);
+            };
+
+            const handleFieldChange = (index, prop, value) => {
+                const newFields = [...fields];
+                newFields[index][prop] = value;
+                setFields(newFields);
+            };
+
+            const handleRemoveField = (index) => {
+                setFields(fields.filter((_, i) => i !== index));
+            };
+
+            const handleRbacChange = (role, permission, checked) => {
+                const newRbac = { ...rbac };
+                const permissions = newRbac[role] || [];
+                if (checked) {
+                    if (!permissions.includes(permission)) {
+                        newRbac[role] = [...permissions, permission];
+                    }
+                } else {
+                    newRbac[role] = permissions.filter(p => p !== permission);
+                }
+                setRbac(newRbac);
+            };
+
+            const handleSubmit = async (e) => {
+                e.preventDefault();
+                setStatus({ loading: true, error: null, success: null });
+                try {
+                    const modelDefinition = {
+                        name: modelName,
+                        tableName: tableName || undefined,
+                        ownerField: ownerField || undefined,
+                        fields,
+                        rbac
+                    };
+                    const data = await api.publishModel(modelDefinition);
+                    setStatus({ loading: false, success: data.message, error: null });
+                    onPublish(); // Refresh model list
+                } catch (err) {
+                    setStatus({ loading: false, error: err.message, success: null });
+                }
+            };
+
+            return (
+                <Card title="Model Editor">
+                    <form onSubmit={handleSubmit}>
+                        {status.error && <div class="mb-4 p-3 bg-red-100 text-red-700 rounded">{status.error}</div>}
+                        {status.success && <div class="mb-4 p-3 bg-green-100 text-green-700 rounded">{status.success}</div>}
+
+                        <Input label="Model Name (e.g., Product)" value={modelName} onChange={e => setModelName(e.target.value)} required />
+                        <Input label="Table Name (optional, e.g., products)" value={tableName} onChange={e => setTableName(e.target.value)} />
+                        <Input label="Owner Field (optional, e.g., userId)" value={ownerField} onChange={e => setOwnerField(e.target.value)} />
+                        
+                        <h3 class="text-lg font-medium text-gray-900 mt-6 mb-3">Fields</h3>
+                        {fields.map((field, index) => (
+                            <div key={index} class="grid grid-cols-1 md:grid-cols-5 gap-3 mb-3 p-3 border rounded-md">
+                                <Input label="Name" value={field.name} onChange={e => handleFieldChange(index, 'name', e.target.value)} />
+                                <Select label="Type" value={field.type} onChange={e => handleFieldChange(index, 'type', e.target.value)}>
+                                    <option value="string">String</option>
+                                    <option value="number">Number</option>
+                                    <option value="boolean">Boolean</option>
+                                    <option value="text">Text (long)</option>
+                                    <option value="relation">Relation (ID)</option>
+                                </Select>
+                                <div class="flex items-end space-x-4 pb-4">
+                                    <Checkbox label="Required" checked={field.required} onChange={e => handleFieldChange(index, 'required', e.target.checked)} />
+                                    <Checkbox label="Unique" checked={field.unique} onChange={e => handleFieldChange(index, 'unique', e.target.checked)} />
+                                </div>
+                                <div class="flex items-end pb-4">
+                                    <Button variant="danger" onClick={() => handleRemoveField(index)}>Remove</Button>
+                                </div>
+                            </div>
+                        ))}
+                        <Button variant="secondary" onClick={handleAddField}>+ Add Field</Button>
+
+                        <h3 class="text-lg font-medium text-gray-900 mt-6 mb-3">Role-Based Access Control (RBAC)</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            {['Admin', 'Manager', 'Viewer'].map(role => (
+                                <div key={role} class="p-3 border rounded-md">
+                                    <h4 class="font-bold">{role}</h4>
+                                    <div class="mt-2 space-y-1">
+                                        {['all', 'create', 'read', 'update', 'delete'].map(perm => (
+                                            <Checkbox
+                                                key={perm}
+                                                label={perm}
+                                                checked={(rbac[role] || []).includes(perm)}
+                                                onChange={e => handleRbacChange(role, perm, e.target.checked)}
+                                            />
+                                        ))}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                        
+                        <div class="mt-8 text-right">
+                            <Button type="submit" variant="primary" disabled={status.loading}>
+                                {status.loading ? 'Publishing...' : 'Publish Model'}
+                            </Button>
+                        </div>
+                    </form>
+                </Card>
+            );
+        }
+
+        /**
+         * Data Manager
+         * Lets user select a model and view/edit/add/delete its data.
+         */
+        function DataManager({ models, refreshModels }) {
+            const [selectedModel, setSelectedModel] = useState(null);
+            const [data, setData] = useState([]);
+            const [status, setStatus] = useState({ loading: false, error: null });
+            const [isModalOpen, setIsModalOpen] = useState(false);
+            const [editingRecord, setEditingRecord] = useState(null); // null for 'new', object for 'edit'
+
+            const loadData = useCallback(async (modelName) => {
+                if (!modelName) {
+                    setData([]);
+                    return;
+                }
+                setStatus({ loading: true, error: null });
+                try {
+                    const model = models.find(m => m.name === modelName);
+                    setSelectedModel(model);
+                    const data = await api.getData(model.name.toLowerCase());
+                    setData(data);
+                } catch (err) {
+                    setStatus({ error: err.message });
+                } finally {
+                    setStatus({ loading: false });
+                }
+            }, [models]);
+            
+            useEffect(() => {
+                if (models.length > 0 && !selectedModel) {
+                   loadData(models[0].name);
+                }
+            }, [models, selectedModel, loadData]);
+
+            const handleModelChange = (e) => {
+                loadData(e.target.value);
+            };
+
+            const handleOpenModal = (record = null) => {
+                setEditingRecord(record);
+                setIsModalOpen(true);
+            };
+
+            const handleCloseModal = () => {
+                setIsModalOpen(false);
+                setEditingRecord(null);
+            };
+
+            const handleDelete = async (id) => {
+                if (window.confirm('Are you sure you want to delete this record?')) {
+                    try {
+                        await api.deleteData(selectedModel.name.toLowerCase(), id);
+                        loadData(selectedModel.name); // Refresh
+                    } catch (err) {
+                        alert(`Error: ${err.message}`);
+                    }
+                }
+            };
+            
+            const handleSave = () => {
+                handleCloseModal();
+                loadData(selectedModel.name); // Refresh data
+            };
+
+            return (
+                <Card title="Data Manager">
+                    <div class="flex justify-between items-center mb-4">
+                        <Select label="Select Model" onChange={handleModelChange} value={selectedModel?.name || ''}>
+                            {models.map(m => <option key={m.name} value={m.name}>{m.name}</option>)}
+                        </Select>
+                        <div class="pt-6 ml-4">
+                             <Button onClick={() => handleOpenModal(null)} disabled={!selectedModel}>
+                                + Add New {selectedModel?.name}
+                            </Button>
+                        </div>
+                    </div>
+
+                    {status.loading && <p>Loading data...</p>}
+                    {status.error && <p class="text-red-500">{status.error}</p>}
+                    
+                    {!status.loading && data.length === 0 && <p>No data found for this model.</p>}
+
+                    {data.length > 0 && (
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+                                    {selectedModel.fields.map(f => (
+                                        <th key={f.name} class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{f.name}</th>
+                                    ))}
+                                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                {data.map(record => (
+                                    <tr key={record.id}>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{record.id}</td>
+                                        {selectedModel.fields.map(f => (
+                                            <td key={f.name} class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                                {f.type === 'boolean' ? (record[f.name] ? 'Yes' : 'No') : String(record[f.name])}
+                                            </td>
+                                        ))}
+                                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
+                                            <Button variant="secondary" onClick={() => handleOpenModal(record)}>Edit</Button>
+                                            <Button variant="danger" onClick={() => handleDelete(record.id)}>Delete</Button>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    )}
+                    
+                    {isModalOpen && (
+                        <DataRecordModal
+                            model={selectedModel}
+                            record={editingRecord}
+                            onClose={handleCloseModal}
+                            onSave={handleSave}
+                        />
+                    )}
+                </Card>
+            );
+        }
+
+        /**
+         * Modal for Adding/Editing a data record
+         */
+        function DataRecordModal({ model, record, onClose, onSave }) {
+            const [formData, setFormData] = useState(() => {
+                // Initialize form data from model fields
+                const initialData = {};
+                model.fields.forEach(f => {
+                    initialData[f.name] = record ? record[f.name] : (f.default || '');
+                    if(f.type === 'boolean') initialData[f.name] = record ? record[f.name] : (f.default || false);
+                });
+                return initialData;
+            });
+            const [status, setStatus] = useState({ loading: false, error: null });
+            
+            const handleChange = (name, value, type) => {
+                if (type === 'checkbox') {
+                    setFormData(prev => ({ ...prev, [name]: value }));
+                } else if (type === 'number') {
+                    setFormData(prev => ({ ...prev, [name]: parseFloat(value) || 0 }));
+                } else {
+                    setFormData(prev => ({ ...prev, [name]: value }));
+                }
+            };
+
+            const handleSubmit = async (e) => {
+                e.preventDefault();
+                setStatus({ loading: true, error: null });
+                try {
+                    if (record) { // Editing
+                        await api.updateData(model.name.toLowerCase(), record.id, formData);
+                    } else { // Creating
+                        await api.createData(model.name.toLowerCase(), formData);
+                    }
+                    onSave();
+                } catch (err) {
+                    setStatus({ loading: false, error: err.message });
+                }
+            };
+
+            return (
+                <div class="fixed inset-0 z-10 overflow-y-auto bg-gray-500 bg-opacity-75">
+                    <div class="flex items-center justify-center min-h-screen">
+                        <div class="bg-white rounded-lg shadow-xl w-full max-w-lg mx-4">
+                            <form onSubmit={handleSubmit}>
+                                <div class="px-6 py-4">
+                                    <h2 class="text-2xl font-bold text-gray-900">{record ? 'Edit' : 'Create'} {model.name}</h2>
+                                </div>
+                                <div class="px-6 py-4 border-t border-gray-200">
+                                    {status.error && <div class="mb-4 p-3 bg-red-100 text-red-700 rounded">{status.error}</div>}
+                                    {model.fields.map(field => {
+                                        const props = {
+                                            key: field.name,
+                                            label: field.name,
+                                            id: field.name,
+                                            name: field.name
+                                        };
+                                        if (field.type === 'boolean') {
+                                            return (
+                                                <div class="mb-4">
+                                                    <Checkbox
+                                                        {...props}
+                                                        checked={!!formData[field.name]}
+                                                        onChange={e => handleChange(field.name, e.target.checked, 'checkbox')}
+                                                    />
+                                                </div>
+                                            );
+                                        }
+                                        if (field.type === 'number') {
+                                            return <Input {...props} type="number" value={formData[field.name]} onChange={e => handleChange(field.name, e.target.value, 'number')} />
+                                        }
+                                        // Default to text
+                                        return <Input {...props} type="text" value={formData[field.name]} onChange={e => handleChange(field.name, e.target.value, 'text')} />
+                                    })}
+                                </div>
+                                <div class="px-6 py-3 bg-gray-50 flex justify-end space-x-3">
+                                    <Button variant="secondary" onClick={onClose}>Cancel</Button>
+                                    <Button type="submit" variant="primary" disabled={status.loading}>
+                                        {status.loading ? 'Saving...' : 'Save'}
+                                    </Button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        /**
+         * Main App Component
+         */
+        function App() {
+            const [page, setPage] = useState('editor'); // 'editor' or 'manager'
+            const [models, setModels] = useState([]);
+            const [status, setStatus] = useState({ loading: true, error: null });
+
+            const fetchModels = useCallback(async () => {
+                setStatus({ loading: true, error: null });
+                try {
+                    const data = await api.getModels();
+                    setModels(data);
+                } catch (err) {
+                    setStatus({ loading: false, error: err.message });
+                } finally {
+                    setStatus({ loading: false });
+                }
+            }, []);
+
+            useEffect(() => {
+                fetchModels();
+            }, [fetchModels]);
+
+            return (
+                <div class="min-h-full">
+                    {/* Header */}
+                    <header class="bg-white shadow">
+                        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                            <div class="flex justify-between h-16">
+                                <div class="flex items-center">
+                                    <h1 class="text-2xl font-bold text-indigo-600">Auto-CRUD Platform</h1>
+                                </div>
+                                <nav class="flex space-x-4">
+                                    <button
+                                        onClick={() => setPage('editor')}
+                                        class={`inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium ${page === 'editor' ? 'border-indigo-500 text-gray-900' : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'}`}
+                                    >
+                                        Model Editor
+                                    </button>
+                                    <button
+                                        onClick={() => setPage('manager')}
+                                        class={`inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium ${page === 'manager' ? 'border-indigo-500 text-gray-900' : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'}`}
+                                    >
+                                        Data Manager
+                                    </button>
+                                </nav>
+                            </div>
+                        </div>
+                    </header>
+
+                    {/* Main Content */}
+                    <main class="py-10">
+                        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                            {status.loading && <p>Loading models...</p>}
+                            {status.error && <div class="p-4 bg-red-100 text-red-700 rounded">{status.error}</div>}
+
+                            {!status.loading && (
+                                <div style={{ display: page === 'editor' ? 'block' : 'none' }}>
+                                    <ModelEditor onPublish={fetchModels} />
+                                </div>
+                            )}
+                            
+                            {!status.loading && (
+                                <div style={{ display: page === 'manager' ? 'block' : 'none' }}>
+                                    <DataManager models={models} refreshModels={fetchModels} />
+                                </div>
+                            )}
+                        </div>
+                    </main>
+                </div>
+            );
+        }
+
+        // --- Mount the App ---
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>

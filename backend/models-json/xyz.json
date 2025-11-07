@@ -1,0 +1,32 @@
+{
+  "name": "xyz",
+  "tableName": "anything",
+  "ownerField": "userID",
+  "fields": [
+    {
+      "name": "name",
+      "type": "string",
+      "required": true,
+      "unique": false
+    },
+    {
+      "name": "roll",
+      "type": "text",
+      "required": true,
+      "unique": true
+    }
+  ],
+  "rbac": {
+    "Admin": [
+      "all"
+    ],
+    "Manager": [
+      "create",
+      "read",
+      "update"
+    ],
+    "Viewer": [
+      "read"
+    ]
+  }
+}
