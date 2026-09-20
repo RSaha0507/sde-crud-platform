@@ -432,6 +432,12 @@ npm run dev
 
 Open the Vite URL, normally `http://localhost:5173`.
 
+Keep the backend terminal running while using the frontend. The frontend calls
+the backend at `http://localhost:4000`; if the backend is stopped or listening
+on another address, the browser will show `Failed to fetch`. Confirm
+`http://localhost:4000/healthz` responds before retrying the frontend. Start
+the backend first, then start the frontend in a second terminal.
+
 To point the frontend at another API:
 
 ```bash
@@ -443,6 +449,16 @@ On PowerShell:
 ```powershell
 $env:VITE_API_URL = "http://localhost:4000"
 npm run dev
+```
+
+From the repository root, the convenience scripts target the appropriate
+package automatically:
+
+```bash
+npm run build
+npm test
+npm run lint
+npm run format:check
 ```
 
 ### Option B: run with Docker Compose

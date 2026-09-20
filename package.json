@@ -1,0 +1,11 @@
+{
+  "name": "sde-crud-platform",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build": "npm --prefix frontend run build",
+    "test": "npm --prefix backend test && npm --prefix frontend test",
+    "lint": "npm --prefix backend run lint && npm --prefix frontend run lint",
+    "format:check": "npm --prefix backend run format:check && npm --prefix frontend run format:check"
+  }
+}
