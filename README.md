@@ -1,8 +1,73 @@
-# SDE CRUD Platform
+<div align="center">
 
-> A metadata-driven CRUD and role-based access-control platform that turns a
-> model definition into a working database table, administrative data UI, and
-> public API.
+# ⚡ SDE CRUD Platform
+
+### Define once. Generate the schema, API, permissions, and admin UI.
+
+<p>
+  <a href="https://github.com/RSaha0507/sde-crud-platform/actions/workflows/ci.yml">
+    <img src="https://img.shields.io/github/actions/workflow/status/RSaha0507/sde-crud-platform/ci.yml?branch=main&style=for-the-badge&label=CI" alt="CI status">
+  </a>
+  <a href="https://github.com/RSaha0507/sde-crud-platform">
+    <img src="https://img.shields.io/github/stars/RSaha0507/sde-crud-platform?style=for-the-badge&color=f59e0b" alt="GitHub stars">
+  </a>
+  <a href="https://github.com/RSaha0507/sde-crud-platform/blob/main/LICENSE">
+    <img src="https://img.shields.io/badge/license-private-lightgrey?style=for-the-badge" alt="License">
+  </a>
+</p>
+
+<p>
+  <img src="https://img.shields.io/badge/Node.js-22-339933?style=flat-square&logo=node.js&logoColor=white" alt="Node.js">
+  <img src="https://img.shields.io/badge/Express-4-000000?style=flat-square&logo=express&logoColor=white" alt="Express">
+  <img src="https://img.shields.io/badge/React-18-61DAFB?style=flat-square&logo=react&logoColor=20232A" alt="React">
+  <img src="https://img.shields.io/badge/Vite-6-646CFF?style=flat-square&logo=vite&logoColor=white" alt="Vite">
+  <img src="https://img.shields.io/badge/SQLite-3-003B57?style=flat-square&logo=sqlite&logoColor=white" alt="SQLite">
+  <img src="https://img.shields.io/badge/Docker-ready-2496ED?style=flat-square&logo=docker&logoColor=white" alt="Docker">
+</p>
+
+<p>
+  <a href="#quick-start">🚀 Quick start</a> •
+  <a href="#how-the-platform-works">🧭 How it works</a> •
+  <a href="#roadmap">🗺️ Roadmap</a>
+</p>
+
+<br>
+
+<img src="https://skillicons.dev/icons?i=nodejs,express,react,vite,sqlite,docker,githubactions&theme=light" alt="Technology stack icons">
+
+</div>
+
+<br>
+
+> **A metadata-driven CRUD and role-based access-control platform** that turns
+> a model definition into a working database table, administrative data UI,
+> and public API.
+
+<div align="center">
+
+|    🧩 Metadata-driven    |      🔐 RBAC-ready       |   🛡️ Validated   | 📦 Containerized |
+| :----------------------: | :----------------------: | :--------------: | :--------------: |
+| Define resources as JSON | Role-aware public routes | Safe dynamic SQL | Docker + Compose |
+
+</div>
+
+## ✨ Why this project exists
+
+Most CRUD applications repeat the same work: create a table, write validation,
+add routes, build forms, and remember authorization rules. This platform
+explores a different approach:
+
+```text
+One model definition
+        ↓
+Validation + schema reconciliation + API + permissions + admin UI
+        ↓
+A working data-backed resource
+```
+
+It is designed as an educational, extensible foundation for metadata-driven
+software—not as a claim that a mock identity header is production
+authentication.
 
 ## Table of contents
 
@@ -26,7 +91,7 @@
 - [Important design decisions](#important-design-decisions)
 - [Contributing](#contributing)
 
-## Project objective
+## 🎯 Project objective
 
 The SDE CRUD Platform is an extensible foundation for quickly creating
 data-backed applications without writing a new controller, route, database
@@ -53,7 +118,65 @@ The platform then:
 This makes the repository both a working CRUD application and a reference
 implementation for metadata-driven application design.
 
-## What makes this project different
+## 🧭 How the platform works
+
+<table>
+<tr>
+<td width="25%" align="center">
+<h3>1️⃣ Define</h3>
+Describe fields, constraints, ownership, and RBAC in JSON or the Model Editor.
+</td>
+<td width="25%" align="center">
+<h3>2️⃣ Publish</h3>
+The backend validates the definition and reconciles the SQLite schema.
+</td>
+<td width="25%" align="center">
+<h3>3️⃣ Operate</h3>
+The generic API exposes admin and permission-aware public CRUD routes.
+</td>
+<td width="25%" align="center">
+<h3>4️⃣ Manage</h3>
+The React Data Manager renders records without model-specific frontend code.
+</td>
+</tr>
+</table>
+
+```mermaid
+%%{init: {"theme": "base", "themeVariables": {
+  "primaryColor": "#dbeafe",
+  "primaryTextColor": "#172554",
+  "primaryBorderColor": "#2563eb",
+  "lineColor": "#64748b",
+  "secondaryColor": "#dcfce7",
+  "tertiaryColor": "#fef3c7"
+}}}%%
+flowchart LR
+    A[📝 Model definition] --> B[✅ Validation]
+    B --> C[🗄️ Schema reconciliation]
+    C --> D[🔌 Generic API]
+    D --> E[🖥️ Admin UI]
+    D --> F[🌐 Public clients]
+```
+
+<details>
+<summary><strong>▶ See the request journey</strong></summary>
+
+```text
+Browser / API client
+        │
+        ▼
+Request ID → Helmet → CORS → Rate limit → JSON body limit
+        │
+        ▼
+Model lookup → RBAC → Ownership → Validation → Parameterized SQL
+        │
+        ▼
+JSON response + request ID + structured log
+```
+
+</details>
+
+## ⭐ What makes this project different
 
 ### 1. One definition drives the entire feature
 
