@@ -1,0 +1,8 @@
+**/node_modules
+**/dist
+**/.env
+**/data.db
+**/models-json
+.git
+.gitignore
+npm-debug.log

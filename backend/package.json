@@ -1,0 +1,28 @@
+{
+  "name": "sde-crud-platform-backend",
+  "version": "1.0.0",
+  "private": true,
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "lint": "eslint .",
+    "format": "prettier --write \"*.js\" \"src/**/*.js\" \"test/**/*.js\" \"package.json\" \".prettierrc.json\"",
+    "format:check": "prettier --check \"*.js\" \"src/**/*.js\" \"test/**/*.js\" \"package.json\" \".prettierrc.json\"",
+    "test": "node --test",
+    "test:watch": "node --test --watch"
+  },
+  "dependencies": {
+    "cors": "2.8.5",
+    "dotenv": "16.4.7",
+    "express": "4.21.2",
+    "express-rate-limit": "7.5.0",
+    "helmet": "8.0.0",
+    "sqlite3": "5.1.7"
+  },
+  "devDependencies": {
+    "@eslint/js": "9.17.0",
+    "eslint": "9.17.0",
+    "prettier": "3.4.2",
+    "supertest": "7.0.0"
+  }
+}
